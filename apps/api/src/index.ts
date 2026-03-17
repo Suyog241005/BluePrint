@@ -1,3 +1,4 @@
+import "dotenv/config"
 import express from "express"
 import cors from "cors"
 import { auth, toNodeHandler, fromNodeHeaders } from "@workspace/better-auth/server"
@@ -10,7 +11,7 @@ const port = 3005
 // Configure CORS middleware
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })

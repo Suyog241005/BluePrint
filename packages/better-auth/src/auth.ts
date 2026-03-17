@@ -17,7 +17,10 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
-  trustedOrigins: ["http://localhost:3000", "http://localhost:3005"],
+  trustedOrigins: [
+    process.env.NEXT_PUBLIC_FRONTEND_URL!,
+    process.env.NEXT_PUBLIC_API_URL!,
+  ],
 })
 
 export type Session = typeof auth.$Infer.Session

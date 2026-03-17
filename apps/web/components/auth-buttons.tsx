@@ -29,7 +29,7 @@ export function AuthButtons() {
       onClick={() =>
         authClient.signIn.social({
           provider: "google",
-          callbackURL: "/",
+          callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND_URL}`,
         })
       }
       className="w-full px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded hover:opacity-90 transition-opacity"
