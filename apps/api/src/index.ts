@@ -1,6 +1,8 @@
 import express from "express"
 import cors from "cors"
 import { auth, toNodeHandler, fromNodeHeaders } from "@workspace/better-auth/server"
+import * as trpcExpress from "@trpc/server/adapters/express"
+import { appRouter, createTRPCContext } from "@workspace/trpc"
 
 const app = express()
 const port = 3005
@@ -17,8 +19,14 @@ app.use(
 // Better Auth handler
 app.all("/api/auth/*splat", toNodeHandler(auth))
 
-// Route with body-parsing should come AFTER the auth handler 
-// unless you use toNodeHandler's options, but putting it after is safer for Express.
+app.use(
+  "/api/trpc",
+  trpcExpress.createExpressMiddleware({
+    router: appRouter,
+    createContext: createTRPCContext,
+  })
+)
+
 app.use(express.json())
 
 app.get("/api/me", async (req, res) => {

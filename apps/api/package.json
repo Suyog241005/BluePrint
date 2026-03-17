@@ -21,6 +21,8 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "@workspace/better-auth": "workspace:*",
+    "@workspace/trpc": "workspace:*",
+    "@trpc/server": "^11.0.0-rc.821",
     "zod": "^4.3.6"
   }
 }
