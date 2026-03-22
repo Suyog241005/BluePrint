@@ -1,6 +1,7 @@
 import { prisma } from "@workspace/db"
 import { AuthButtons } from "@/components/auth-buttons"
 import { TRPCDemo } from "@/components/trpc-demo"
+import { WhiteboardDemo } from "@/components/whiteboard-demo"
 import { auth } from "@workspace/better-auth/server"
 import { headers } from "next/headers"
 
@@ -32,6 +33,7 @@ export default async function Home() {
           Check: {user?.name ?? "No user added yet"}
         </div>
       </section>
+      <WhiteboardDemo/>
     </div>
   )
 }
