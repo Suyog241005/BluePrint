@@ -1,9 +1,9 @@
 import { Geist, Geist_Mono } from "next/font/google"
-
 import "@workspace/ui/globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
 import { TRPCProvider } from "@/components/trpc-provider"
-import { cn } from "@workspace/ui/lib/utils";
+import { Navbar } from "@/components/navbar"
+import { TooltipProvider } from "@workspace/ui/components/tooltip"
+import { cn } from "@workspace/ui/lib/utils"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -24,11 +24,19 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, fontSans.variable)}
+      className={cn("antialiased light", fontMono.variable, fontSans.variable)}
+      style={{ colorScheme: 'light' }}
     >
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased bg-slate-50/50">
         <TRPCProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <TooltipProvider delayDuration={0}>
+            <div className="min-h-screen flex flex-col">
+              <Navbar />
+              <main className="flex-1">
+                {children}
+              </main>
+            </div>
+          </TooltipProvider>
         </TRPCProvider>
       </body>
     </html>

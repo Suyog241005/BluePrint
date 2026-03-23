@@ -11,12 +11,13 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: `${process.env.NEXT_PUBLIC_API_URL}/api/trpc`,
-          // You can pass headers here for auth
-          async headers() {
-            return {
-              // Better Auth typically uses cookies, so ensure credentials are true in fetch if needed
-            }
+          url: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005"}/api/trpc`,
+          // This tells the browser to send cookies even for cross-origin requests
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: "include",
+            })
           },
         }),
       ],
