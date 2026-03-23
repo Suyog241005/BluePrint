@@ -1,8 +1,12 @@
 import { z } from "zod"
 import { router, publicProcedure, protectedProcedure } from "../trpc"
+import { whiteboardRouter } from "./whiteboard"
 
+/**
+ * Main application router
+ */
 export const appRouter = router({
-  // 1. Basic Hello Testing
+  // 1. Basic Health/Hello
   hello: publicProcedure
     .input(z.object({ text: z.string() }))
     .query(({ input }) => {
@@ -11,43 +15,14 @@ export const appRouter = router({
       }
     }),
 
-  // 2. User Info
+  // 2. Auth Identity
   getMe: protectedProcedure.query(({ ctx }) => {
     return ctx.session.user
   }),
 
-  /**
-   * 3. Whiteboard Management
-   */
-  getWhiteboards: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.whiteboard.findMany({
-      where: { userId: ctx.session.user.id },
-      orderBy: { updatedAt: "desc" },
-    })
-  }),
-
-  createWhiteboard: protectedProcedure
-    .input(z.object({ name: z.string().min(1) }))
-    .mutation(({ ctx, input }) => {
-      return ctx.db.whiteboard.create({
-        data: {
-          name: input.name,
-          userId: ctx.session.user.id,
-        },
-      })
-    }),
-
-  deleteWhiteboard: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.db.whiteboard.delete({
-        where: { 
-          id: input.id,
-          userId: ctx.session.user.id, // Security: ensure only the owner can delete
-        },
-      })
-    }),
+  // 3. Whiteboard Feature Namespace
+  whiteboard: whiteboardRouter,
 })
 
-// export type definition of API
+// Export type definition of API
 export type AppRouter = typeof appRouter
