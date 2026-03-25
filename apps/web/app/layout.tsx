@@ -31,14 +31,14 @@ export default async function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={cn("light antialiased", fontMono.variable, fontSans.variable)}
-      style={{ colorScheme: "light" }}
+      style={{ colorScheme: "light", height: "100%", width: "100%" }}
     >
-      <body className="bg-slate-50/50 font-sans antialiased">
+      <body className="h-full w-full bg-slate-50/50 font-sans antialiased">
         <TRPCProvider cookies={cookies}>
           <TooltipProvider delayDuration={0}>
-            <div className="flex min-h-screen flex-col">
+            <div className="flex h-full flex-col">
               <Navbar />
-              <main className="flex-1">{children}</main>
+              <main className="h-full flex-1">{children}</main>
             </div>
           </TooltipProvider>
           <Toaster />

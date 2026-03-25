@@ -1,29 +1,19 @@
-import { WhiteboardList } from "@/components/whiteboard-list"
-import { auth } from "@workspace/better-auth/server"
-import { headers } from "next/headers"
+import { WhiteboardList } from "@/components/whiteboard/whiteboard-list"
 import { Suspense } from "react"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Card, CardHeader, CardContent } from "@workspace/ui/components/card"
-import { redirect } from "next/navigation"
+import { requireAuth } from "@/lib/auth-utils"
 
 export default async function Home() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-  const user = session?.user
-  if (!user) {
-    return redirect("/sign-in")
-  }
+  await requireAuth()
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-10 p-8">
-      {user && (
-        <section>
-          <Suspense fallback={<WhiteboardListSkeleton />}>
-            <WhiteboardList />
-          </Suspense>
-        </section>
-      )}
+      <section>
+        <Suspense fallback={<WhiteboardListSkeleton />}>
+          <WhiteboardList />
+        </Suspense>
+      </section>
     </div>
   )
 }

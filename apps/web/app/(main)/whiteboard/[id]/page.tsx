@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams, useRouter } from "next/navigation"
-import { WhiteboardEditor } from "@/components/whiteboard-editor"
+import { WhiteboardEditor } from "@/components/whiteboard/whiteboard-editor"
 import { Button } from "@workspace/ui/components/button"
 import { ChevronLeft, Share2, MoreHorizontal } from "lucide-react"
 import { useSuspenseWhiteboard } from "@/hooks/whiteboard-hooks"
