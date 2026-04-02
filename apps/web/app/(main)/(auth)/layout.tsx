@@ -1,9 +1,9 @@
-import { AuthLayout } from "@/components/auth/authLayout"
+import { AuthLayout } from "@/components/auth/authLayout";
 
 export default function AuthLayoutPage({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  return <AuthLayout>{children}</AuthLayout>
+  return <AuthLayout>{children}</AuthLayout>;
 }

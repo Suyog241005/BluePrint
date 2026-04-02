@@ -1,30 +1,30 @@
-import { Geist, Geist_Mono } from "next/font/google"
-import "@workspace/ui/globals.css"
-import { TRPCProvider } from "@/components/trpc-provider"
-import { Navbar } from "@/components/navbar"
-import { Toaster } from "@workspace/ui/components/sonner"
-import { TooltipProvider } from "@workspace/ui/components/tooltip"
-import { cn } from "@workspace/ui/lib/utils"
+import { Geist, Geist_Mono } from "next/font/google";
+import "@workspace/ui/globals.css";
+import { TRPCProvider } from "@/components/trpc-provider";
+import { Navbar } from "@/components/navbar";
+import { Toaster } from "@workspace/ui/components/sonner";
+import { TooltipProvider } from "@workspace/ui/components/tooltip";
+import { cn } from "@workspace/ui/lib/utils";
 
 const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
-})
+});
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-})
+});
 
-import { headers } from "next/headers"
+import { headers } from "next/headers";
 
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-  const headerList = await headers()
-  const cookies = headerList.get("cookie") ?? undefined
+  const headerList = await headers();
+  const cookies = headerList.get("cookie") ?? undefined;
 
   return (
     <html
@@ -45,5 +45,5 @@ export default async function RootLayout({
         </TRPCProvider>
       </body>
     </html>
-  )
+  );
 }

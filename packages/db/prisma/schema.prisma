@@ -25,6 +25,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   whiteboards   Whiteboard[]
+  members       Member[]
 
   @@unique([email])
   @@map("user")
@@ -91,7 +92,33 @@ model Whiteboard {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  members   Member[]
 
   @@index([userId])
   @@map("whiteboard")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model Member {
+  id String @id @default(cuid())
+
+  whiteboardId String
+  whiteboard   Whiteboard @relation(fields: [whiteboardId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role Role @default(VIEWER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([whiteboardId, userId])
+  @@index([whiteboardId])
+  @@index([userId])
+  @@map("member")
 }

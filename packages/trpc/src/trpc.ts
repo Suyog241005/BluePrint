@@ -11,20 +11,9 @@ export const createTRPCContext = async (opts: { req: any; res?: any }) => {
   // Extract headers
   const headers = "headers" in opts.req ? opts.req.headers : new Headers()
   
-  // Debug: Let's see if cookies are even arriving
-  const cookieHeader = "get" in headers ? (headers as any).get("cookie") : (headers as any)["cookie"]
-  console.log(`[tRPC Context] Request from: ${opts.req.method} ${opts.req.url}`)
-  console.log(`[tRPC Context] Has Cookies: ${!!cookieHeader}`)
-
   const session = await auth.api.getSession({
     headers: fromNodeHeaders(headers),
   })
-
-  if (session) {
-    console.log(`[tRPC Context] Session found for user: ${session.user.id}`)
-  } else {
-    console.log(`[tRPC Context] No session found`)
-  }
 
   return {
     db: prisma,

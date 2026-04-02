@@ -11,6 +11,12 @@ export const whiteboardRouter = router({
         data: {
           name,
           userId: ctx.session.user.id,
+          members: {
+            create: {
+              userId: ctx.session.user.id,
+              role: "ADMIN",
+            },
+          },
         },
       })
     }),

@@ -1,12 +1,18 @@
-"use client"
+"use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { httpBatchLink } from "@trpc/client"
-import { useState } from "react"
-import { trpc } from "@/lib/trpc"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { httpBatchLink } from "@trpc/client";
+import { useState } from "react";
+import { trpc } from "@/lib/trpc";
 
-export function TRPCProvider({ children, cookies }: { children: React.ReactNode; cookies?: string }) {
-  const [queryClient] = useState(() => new QueryClient())
+export function TRPCProvider({
+  children,
+  cookies,
+}: {
+  children: React.ReactNode;
+  cookies?: string;
+}) {
+  const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
@@ -17,25 +23,25 @@ export function TRPCProvider({ children, cookies }: { children: React.ReactNode;
             if (typeof window === "undefined" && cookies) {
               return {
                 cookie: cookies,
-              }
+              };
             }
-            return {}
+            return {};
           },
           // For client-side requests, fetch will handle credentials: "include" automatically
           fetch(url, options) {
             return fetch(url, {
               ...options,
               credentials: "include",
-            })
+            });
           },
         }),
       ],
     })
-  )
+  );
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </trpc.Provider>
-  )
+  );
 }

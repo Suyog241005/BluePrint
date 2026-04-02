@@ -1,11 +1,11 @@
-import { WhiteboardList } from "@/components/whiteboard/whiteboard-list"
-import { Suspense } from "react"
-import { Skeleton } from "@workspace/ui/components/skeleton"
-import { Card, CardHeader, CardContent } from "@workspace/ui/components/card"
-import { requireAuth } from "@/lib/auth-utils"
+import { WhiteboardList } from "@/components/whiteboard/whiteboard-list";
+import { Suspense } from "react";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { Card, CardHeader, CardContent } from "@workspace/ui/components/card";
+import { requireAuth } from "@/lib/auth-utils";
 
 export default async function Home() {
-  await requireAuth()
+  await requireAuth();
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-10 p-8">
@@ -15,7 +15,7 @@ export default async function Home() {
         </Suspense>
       </section>
     </div>
-  )
+  );
 }
 
 function WhiteboardListSkeleton() {
@@ -39,5 +39,5 @@ function WhiteboardListSkeleton() {
         ))}
       </div>
     </div>
-  )
+  );
 }

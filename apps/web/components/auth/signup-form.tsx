@@ -1,27 +1,27 @@
-"use client"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
-import { Controller, useForm } from "react-hook-form"
-import { toast } from "sonner"
-import { z } from "zod"
+"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
-import { authClient } from "@workspace/better-auth/client"
+import { authClient } from "@workspace/better-auth/client";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@workspace/ui/components/card"
+} from "@workspace/ui/components/card";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
-import { Button } from "@workspace/ui/components/button"
-import Link from "next/link"
+} from "@workspace/ui/components/field";
+import { Input } from "@workspace/ui/components/input";
+import { Button } from "@workspace/ui/components/button";
+import Link from "next/link";
 
 const signupSchema = z
   .object({
@@ -35,12 +35,12 @@ const signupSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
-  })
+  });
 
-type SignUpFormValues = z.infer<typeof signupSchema>
+type SignUpFormValues = z.infer<typeof signupSchema>;
 
 export const SignupForm = () => {
-  const router = useRouter()
+  const router = useRouter();
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -49,9 +49,9 @@ export const SignupForm = () => {
       password: "",
       confirmPassword: "",
     },
-  })
+  });
   const onSubmit = async (values: SignUpFormValues) => {
-    console.log(values)
+    console.log(values);
     await authClient.signUp.email(
       {
         email: values.email,
@@ -61,18 +61,18 @@ export const SignupForm = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Account created successfully")
-          form.reset()
-          router.push(`${process.env.NEXT_PUBLIC_FRONTEND_URL}`)
+          toast.success("Account created successfully");
+          form.reset();
+          router.push(`${process.env.NEXT_PUBLIC_FRONTEND_URL}`);
         },
         onError: (ctx) => {
-          console.log(ctx.error)
-          toast.error(ctx.error.message)
+          console.log(ctx.error);
+          toast.error(ctx.error.message);
         },
       }
-    )
-  }
-  const isPending = form.formState.isSubmitting
+    );
+  };
+  const isPending = form.formState.isSubmitting;
 
   return (
     <div className="flex flex-col gap-6">
@@ -182,5 +182,5 @@ export const SignupForm = () => {
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
