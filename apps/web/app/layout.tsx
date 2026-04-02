@@ -31,9 +31,14 @@ export default async function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={cn("light antialiased", fontMono.variable, fontSans.variable)}
-      style={{ colorScheme: "light", height: "100%", width: "100%" }}
+      style={{
+        colorScheme: "light",
+        height: "100%",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
     >
-      <body className="h-full w-full bg-slate-50/50 font-sans antialiased">
+      <body className="box-border h-full w-full bg-slate-50/50 font-sans antialiased">
         <TRPCProvider cookies={cookies}>
           <TooltipProvider delayDuration={0}>
             <div className="flex h-full flex-col">
