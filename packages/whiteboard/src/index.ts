@@ -20,6 +20,7 @@ export type WhiteboardShape = {
   y: number
   width?: number
   height?: number
+  points?: number[] // For lines
   fill: string
   opacity?: number
 }
