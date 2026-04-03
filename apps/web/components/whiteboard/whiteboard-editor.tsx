@@ -1,14 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { HocuspocusProvider } from "@hocuspocus/provider";
-import * as Y from "yjs";
-import {
-  WHITEBOARD_KEYS,
-  createWhiteboardDoc,
-  type WhiteboardShape,
-} from "@workspace/whiteboard";
-import { Button } from "@workspace/ui/components/button";
 import {
   CircleIcon,
   MousePointer2Icon,
@@ -16,6 +9,12 @@ import {
   TrashIcon,
   PencilIcon,
 } from "lucide-react";
+import {
+  WHITEBOARD_KEYS,
+  createWhiteboardDoc,
+  type WhiteboardShape,
+} from "@workspace/whiteboard";
+import { Button } from "@workspace/ui/components/button";
 import {
   Tooltip,
   TooltipContent,

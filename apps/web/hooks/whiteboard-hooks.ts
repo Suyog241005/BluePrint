@@ -1,7 +1,7 @@
 "use client";
 
-import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 /**
  * Hook to fetch all whiteboards using suspense

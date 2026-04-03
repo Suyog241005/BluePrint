@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
-import { auth } from "@workspace/better-auth/server";
 import { redirect } from "next/navigation";
+import { auth } from "@workspace/better-auth/server";
 
 export const requireAuth = async () => {
   const session = await auth.api.getSession({

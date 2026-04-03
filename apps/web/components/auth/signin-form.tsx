@@ -3,8 +3,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import Link from "next/link";
 import { z } from "zod";
-
 import { authClient } from "@workspace/better-auth/client";
 import {
   Card,
@@ -21,7 +21,6 @@ import {
 } from "@workspace/ui/components/field";
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
-import Link from "next/link";
 
 const signinSchema = z.object({
   email: z.email("Invalid email address"),

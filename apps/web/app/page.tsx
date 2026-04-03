@@ -1,5 +1,5 @@
-import { WhiteboardList } from "@/components/whiteboard/whiteboard-list";
 import { Suspense } from "react";
+import { WhiteboardList } from "@/components/whiteboard/whiteboard-list";
 import { requireAuth } from "@/lib/auth-utils";
 import { WhiteboardListSkeleton } from "@/components/whiteboard/skeleton/whiteboard-list-skeleton";
 

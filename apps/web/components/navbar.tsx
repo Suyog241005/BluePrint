@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogOut, Settings, User } from "lucide-react";
 import { authClient } from "@workspace/better-auth/client";
 import {
   Avatar,
@@ -17,7 +18,6 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { Button } from "@workspace/ui/components/button";
-import { LogOut, LayoutDashboard, Settings, User } from "lucide-react";
 
 export function Navbar() {
   const { data: session } = authClient.useSession();

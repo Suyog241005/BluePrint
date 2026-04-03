@@ -1,10 +1,10 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "@workspace/ui/globals.css";
-import { TRPCProvider } from "@/components/trpc-provider";
-import { Navbar } from "@/components/navbar";
 import { Toaster } from "@workspace/ui/components/sonner";
 import { TooltipProvider } from "@workspace/ui/components/tooltip";
 import { cn } from "@workspace/ui/lib/utils";
+import { TRPCProvider } from "@/components/trpc-provider";
+import { Navbar } from "@/components/navbar";
 
 const fontSans = Geist({
   subsets: ["latin"],
