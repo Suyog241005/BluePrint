@@ -1,21 +1,125 @@
-"use client";
+"use client"
 
-import React, { useRef, useState, useEffect } from "react";
-import { Stage, Layer, Rect, Circle, Line } from "react-konva";
-import type Konva from "konva";
-import type { WhiteboardShape } from "@workspace/whiteboard";
+import React, { useRef, useState, useEffect, useMemo } from "react"
+import { Stage, Layer, Shape, Line } from "react-konva"
+import type Konva from "konva"
+import type { WhiteboardShape } from "@workspace/whiteboard"
+import rough from "roughjs"
 
 interface CanvasProps {
-  shapes: WhiteboardShape[];
-  onShapeUpdate: (shape: Partial<WhiteboardShape> & { id: string }) => void;
+  shapes: WhiteboardShape[]
+  onShapeUpdate: (shape: Partial<WhiteboardShape> & { id: string }) => void
   onAddShape: (
     type: WhiteboardShape["type"],
     x: number,
     y: number,
-    points?: number[]
+    width?: number,
+    height?: number,
+    points?: number[],
+    seed?: number
   ) => void;
   tool: string;
   color: string;
+}
+
+/**
+ * 1. RoughShape Wrapper
+ * Uses rough.js to "sketch" the shape onto the Konva canvas.
+ */
+const RoughShape = ({
+  shape,
+  tool,
+  onShapeUpdate,
+}: {
+  shape: WhiteboardShape;
+  tool: string;
+  onShapeUpdate: (shape: Partial<WhiteboardShape> & { id: string }) => void;
+}) => {
+  const isSelected = false; // We'll add this later
+  
+  return (
+    <Shape
+      key={shape.id}
+      x={shape.x ?? 0}
+      y={shape.y ?? 0}
+      width={shape.width ?? 80}
+      height={shape.height ?? 80}
+      draggable={tool === "SELECT"}
+      onDragEnd={(e) => {
+        onShapeUpdate({
+          id: shape.id,
+          x: e.target.x(),
+          y: e.target.y(),
+        });
+      }}
+      sceneFunc={(context, konvaShape) => {
+        const rc = rough.canvas(context.canvas as any);
+        const seed = shape.seed ?? 12345;
+        const roughness = shape.roughness ?? 1.5;
+        const fill = shape.fill;
+
+        // Setup rough drawing props
+        const options = {
+          seed,
+          roughness,
+          stroke: fill,
+          strokeWidth: 2,
+          fill: shape.type !== "line" ? `${fill}20` : undefined,
+          fillStyle: "hachure" as const,
+        };
+
+        if (shape.type === "rect") {
+          rc.rectangle(0, 0, shape.width ?? 80, shape.height ?? 80, options);
+        } else if (shape.type === "circle") {
+          const w = shape.width ?? 80;
+          const h = shape.height ?? 80;
+          const diameter = Math.sqrt(w * w + h * h);
+          rc.circle(w / 2, h / 2, diameter, options);
+        } else if (shape.type === "line" && shape.points) {
+          const pairs: [number, number][] = [];
+          for (let i = 0; i < shape.points.length; i += 2) {
+            const px = shape.points[i];
+            const py = shape.points[i + 1];
+            if (px !== undefined && py !== undefined) {
+              pairs.push([px, py]);
+            }
+          }
+          if (pairs.length > 0) {
+            rc.curve(pairs, options);
+          }
+        }
+
+        context.fillStrokeShape(konvaShape);
+      }}
+      hitFunc={(context, konvaShape) => {
+        // Draw a simple path for hit detection (invisible to user)
+        if (shape.type === "rect") {
+          context.beginPath();
+          context.rect(0, 0, shape.width ?? 80, shape.height ?? 80);
+          context.closePath();
+          context.fillStrokeShape(konvaShape);
+        } else if (shape.type === "circle") {
+          const w = shape.width ?? 80;
+          const h = shape.height ?? 80;
+          const diameter = Math.sqrt(w * w + h * h);
+          context.beginPath();
+          context.arc(w / 2, h / 2, diameter / 2, 0, Math.PI * 2);
+          context.closePath();
+          context.fillStrokeShape(konvaShape);
+        } else if (shape.type === "line" && shape.points) {
+          // Lines are hard to hit, so we draw a thick invisible boundary
+          context.beginPath();
+          context.moveTo(shape.points[0] ?? 0, shape.points[1] ?? 0);
+          for (let i = 2; i < shape.points.length; i += 2) {
+            context.lineTo(shape.points[i] ?? 0, shape.points[i + 1] ?? 0);
+          }
+          context.lineWidth = 20; // Fat hit area for mouse
+          context.stroke();
+          context.fillStrokeShape(konvaShape);
+        }
+      }}
+    />
+  )
 }
 
 export function Canvas({
@@ -25,39 +129,39 @@ export function Canvas({
   tool,
   color,
 }: CanvasProps) {
-  const stageRef = useRef<Konva.Stage>(null);
-
-  // 1. Stage State: Panning & Zooming
-  const [scale, setScale] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [size, setSize] = useState({ width: 0, height: 0 });
-
-  // 2. Local State: Currently drawing (unsynced yet)
+  const stageRef = useRef<Konva.Stage>(null)
+  const [scale, setScale] = useState(1)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [size, setSize] = useState({ width: 0, height: 0 })
   const [currentLine, setCurrentLine] = useState<number[] | null>(null);
+  const [newShape, setNewShape] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    type: "rect" | "circle";
+  } | null>(null);
 
-  // -- Maintain responsive size --
   useEffect(() => {
     const updateSize = () => {
       if (typeof window !== "undefined") {
-        setSize({ width: window.innerWidth, height: window.innerHeight - 64 });
+        setSize({ width: window.innerWidth, height: window.innerHeight - 64 })
       }
-    };
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
-  }, []);
+    }
+    updateSize()
+    window.addEventListener("resize", updateSize)
+    return () => window.removeEventListener("resize", updateSize)
+  }, [])
 
-  // -- Handlers: Zoom (Wheel) --
   const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
-    e.evt.preventDefault();
-    const stage = stageRef.current;
-    if (!stage) return;
+    e.evt.preventDefault()
+    const stage = stageRef.current
+    if (!stage) return
 
     const oldScale = stage.scaleX();
     const pointer = stage.getPointerPosition();
     if (!pointer) return;
 
-    // Scale factor
     const scaleBy = 1.1;
     const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
@@ -76,12 +180,10 @@ export function Canvas({
     setPosition(newPos);
   };
 
-  // -- Handlers: Drawing --
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const stage = stageRef.current;
     if (!stage) return;
 
-    // Get absolute mouse position on the board
     const pointer = stage.getPointerPosition();
     if (!pointer) return;
 
@@ -91,13 +193,19 @@ export function Canvas({
     if (tool === "PENCIL") {
       setCurrentLine([x, y]);
     } else if (tool === "CIRCLE" || tool === "RECT") {
-      onAddShape(tool.toLowerCase() as any, x, y);
+      setNewShape({
+        x,
+        y,
+        width: 0,
+        height: 0,
+        type: tool.toLowerCase() as any,
+      });
     }
   };
 
   const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const stage = stageRef.current;
-    if (tool !== "PENCIL" || !currentLine || !stage) return;
+    if (!stage) return;
 
     const pointer = stage.getPointerPosition();
     if (!pointer) return;
@@ -105,26 +213,48 @@ export function Canvas({
     const x = (pointer.x - stage.x()) / stage.scaleX();
     const y = (pointer.y - stage.y()) / stage.scaleY();
 
-    setCurrentLine((prev) => (prev ? [...prev, x, y] : [x, y]));
+    if (tool === "PENCIL" && currentLine) {
+      setCurrentLine((prev) => (prev ? [...prev, x, y] : [x, y]));
+    } else if (newShape) {
+      setNewShape((prev) =>
+        prev
+          ? {
+              ...prev,
+              width: x - prev.x,
+              height: y - prev.y,
+            }
+          : null
+      );
+    }
   };
 
   const handleMouseUp = () => {
     if (tool === "PENCIL" && currentLine && currentLine.length > 2) {
-      // Finalize the line and send to Yjs
-      const x = currentLine[0];
-      const y = currentLine[1];
-
-      if (x && y) {
-        // Shift points relative to x,y for easier dragging/offsetting later
-        const relativePoints = currentLine.map((p, i) =>
-          i % 2 === 0 ? p - x : p - y
-        );
-
-        onAddShape("line", x, y, relativePoints);
-      }
+      const x = currentLine[0]!;
+      const y = currentLine[1]!;
+      const relativePoints = currentLine.map((p, i) =>
+        i % 2 === 0 ? p - x : p - y
+      );
+      const seed = Math.floor(Math.random() * 1000000);
+      onAddShape("line", x, y, undefined, undefined, relativePoints, seed);
       setCurrentLine(null);
+    } else if (newShape) {
+      const seed = Math.floor(Math.random() * 1000000);
+      if (Math.abs(newShape.width) > 5 || Math.abs(newShape.height) > 5) {
+        onAddShape(
+          newShape.type,
+          newShape.x,
+          newShape.y,
+          newShape.width,
+          newShape.height,
+          undefined,
+          seed
+        );
+      }
+      setNewShape(null);
     } else {
       setCurrentLine(null);
+      setNewShape(null);
     }
   };
 
@@ -145,69 +275,45 @@ export function Canvas({
       className="cursor-crosshair bg-slate-50/50"
     >
       <Layer>
-        {/* Render Synced Shapes */}
-        {shapes.map((shape) => {
-          if (shape.type === "rect") {
-            return (
-              <Rect
-                key={shape.id}
-                x={shape.x ?? 0}
-                y={shape.y ?? 0}
-                width={80}
-                height={80}
-                fill={shape.fill}
-                shadowBlur={10}
-                shadowOpacity={0.1}
-                draggable={tool === "SELECT"}
-                cornerRadius={12}
-              />
-            );
-          }
-          if (shape.type === "circle") {
-            return (
-              <Circle
-                key={shape.id}
-                x={shape.x ?? 0}
-                y={shape.y ?? 0}
-                radius={40}
-                fill={shape.fill}
-                shadowBlur={10}
-                shadowOpacity={0.1}
-                draggable={tool === "SELECT"}
-              />
-            );
-          }
-          if (shape.type === "line" && shape.points) {
-            return (
-              <Line
-                key={shape.id}
-                x={shape.x ?? 0}
-                y={shape.y ?? 0}
-                points={shape.points}
-                stroke={shape.fill}
-                strokeWidth={4}
-                tension={0.5}
-                lineCap="round"
-                lineJoin="round"
-                draggable={tool === "SELECT"}
-              />
-            );
-          }
-          return null;
-        })}
+        {shapes.map((shape) => (
+          <RoughShape
+            key={shape.id}
+            shape={shape}
+            tool={tool}
+            onShapeUpdate={onShapeUpdate}
+          />
+        ))}
 
-        {/* Render active pencil line (local only until done) */}
         {currentLine && (
           <Line
             points={currentLine}
             stroke={color}
-            strokeWidth={4}
+            strokeWidth={2}
             tension={0.5}
             lineCap="round"
             lineJoin="round"
           />
         )}
+
+        {newShape && (
+          <RoughShape
+            key="ghost"
+            shape={{
+              id: "ghost",
+              type: newShape.type,
+              x: newShape.x,
+              y: newShape.y,
+              width: newShape.width,
+              height: newShape.height,
+              fill: color,
+              seed: 42,
+              roughness: 1.2,
+            }}
+            tool="NONE"
+            onShapeUpdate={() => {}}
+          />
+        )}
       </Layer>
     </Stage>
-  );
+  )
 }

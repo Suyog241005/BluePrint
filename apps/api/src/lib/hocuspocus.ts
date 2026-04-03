@@ -3,82 +3,107 @@ import * as Y from "yjs";
 
 import { prisma, Role } from "@workspace/db";
 import { auth, fromNodeHeaders } from "@workspace/better-auth/server";
+import { WHITEBOARD_KEYS } from "@workspace/whiteboard";
 
 /**
  * Initialize Hocuspocus Server with Persistence
  */
 export const hocuspocus = new Hocuspocus({
-  // Step 1: Authentication & Context
+  debounce: 2000,
+
   async onConnect({ request, documentName }) {
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(request.headers),
     });
 
     if (!session) {
+      console.error(
+        `❌ Connection rejected: No session found for board ${documentName}`
+      );
       throw new Error("Unauthorized");
     }
 
-    // C. Verify Board Access (Owner or Member)
     const board = await prisma.whiteboard.findUnique({
       where: { id: documentName },
       include: {
         members: {
-          where: {
-            whiteboardId: documentName,
-            userId: session.user.id,
-          },
+          where: { userId: session.user.id },
         },
       },
     });
+
     if (!board) {
-      throw new Error("Forbidden");
+      throw new Error(`Board ${documentName} not found`);
     }
 
-    const role = board.members.find(
-      (member) => member.userId === session.user.id
-    )?.role;
+    let role: Role = Role.VIEWER;
+    if (board.userId === session.user.id) {
+      role = Role.ADMIN;
+      console.log(`👑 Owner detected: ${session.user.id} -> ADMIN`);
+    } else if (board.members.length > 0 && board.members[0]) {
+      role = board.members[0].role;
+      console.log(`👥 Member detected: ${session.user.id} -> ${role}`);
+    } else {
+      console.log(`👀 Visitor detected: ${session.user.id} -> VIEWER`);
+    }
 
-    console.log(`User role: ${role}`);
-    console.log(`User: ${session.user}`);
-
-    // Store user info in context for other hooks
-    return {
-      user: session.user,
-      role,
-    };
+    return { user: session, role };
   },
 
-  // Step 2: Load from Database
-  async onLoadDocument({ documentName, context }) {
+  /**
+   * KEY FIX: Apply the stored binary state to the document Hocuspocus provides.
+   * Do NOT return raw bytes — you must call Y.applyUpdate on the provided document.
+   */
+  async onLoadDocument({ document, documentName }) {
     console.log(`📂 Loading document: ${documentName}`);
 
-    // Find the whiteboard in Prisma
-    const whiteboard = await prisma.whiteboard.findUniqueOrThrow({
+    const whiteboard = await prisma.whiteboard.findUnique({
       where: { id: documentName },
+      select: { data: true },
     });
 
-    // Return the binary data to Yjs
-    return whiteboard.data;
+    if (!whiteboard?.data) {
+      console.log("✨ New document — no data in DB yet");
+      return document;
+    }
+
+    const uint8 = new Uint8Array(whiteboard.data);
+
+    // Apply the stored state to the server's Y.Doc instance
+    Y.applyUpdate(document, uint8);
+
+    const shapeCount = document.getMap(WHITEBOARD_KEYS.SHAPES).size;
+    console.log(
+      `📦 Loaded ${whiteboard.data.length} bytes for ${documentName}. Shapes: ${shapeCount}`
+    );
+
+    return document;
   },
 
-  // Step 3: Save to Database
   async onStoreDocument({ documentName, document, context }) {
-    if (context.role === Role.VIEWER) {
-      console.log("Viewer cannot save document");
+    if (context?.role === Role.VIEWER) {
+      console.log("🚫 View-only access: Skipping save");
       return;
     }
-    const data = Buffer.from(Y.encodeStateAsUpdate(document));
-    console.log(data);
-    await prisma.whiteboard
-      .update({
+
+    try {
+      const state = Y.encodeStateAsUpdate(document);
+      const buffer = Buffer.from(state);
+      const shapeCount = document.getMap(WHITEBOARD_KEYS.SHAPES).size;
+
+      console.log(
+        `💾 Saving ${documentName}: ${buffer.length} bytes, ${shapeCount} shapes`
+      );
+
+      await prisma.whiteboard.update({
         where: { id: documentName },
-        data: {
-          data: data,
-        },
-      })
-      .catch((err) => {
-        console.error("❌ Failed to save whiteboard:", err.message);
+        data: { data: buffer },
       });
-    console.log(`💾 Saving document: ${documentName}`);
+
+      console.log(`✅ Persisted ${documentName} successfully`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      console.error(`❌ Failed to store document ${documentName}:`, message);
+    }
   },
 });

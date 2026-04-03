@@ -23,6 +23,10 @@ export type WhiteboardShape = {
   points?: number[] // For lines
   fill: string
   opacity?: number
+
+  // RoughJS specific
+  seed?: number
+  roughness?: number
 }
 
 /**

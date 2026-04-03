@@ -51,10 +51,9 @@ app.get("/api/me", async (req, res) => {
  * Whiteboard WebSocket Route
  */
 wsApp.ws("/api/whiteboard/:room", async (ws, req) => {
-  const roomName = req.params.room || "demo-room"
-  hocuspocus.handleConnection(ws, req, {
-    docName: roomName,
-  })
+  // Let Hocuspocus automatically handle the document identifier
+  // from the provider's 'name' property.
+  hocuspocus.handleConnection(ws, req)
 })
 
 app.listen(port, () => {
