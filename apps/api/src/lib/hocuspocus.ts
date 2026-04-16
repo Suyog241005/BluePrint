@@ -11,7 +11,7 @@ import { WHITEBOARD_KEYS } from "@workspace/whiteboard";
 export const hocuspocus = new Hocuspocus({
   debounce: 2000,
 
-  async onConnect({ request, documentName }) {
+  async onAuthenticate({ request, documentName }) {
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(request.headers),
     });
@@ -46,6 +46,8 @@ export const hocuspocus = new Hocuspocus({
     } else {
       console.log(`👀 Visitor detected: ${session.user.id} -> VIEWER`);
     }
+
+    console.log(`📡 User joined: ${session.user.email} (Role: ${role}) for board ${documentName}`);
 
     return { user: session, role };
   },

@@ -21,6 +21,7 @@ import {
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 import { DynamicCanvas } from "@/lib/dynamic-exporter";
+import { authClient } from "@workspace/better-auth/client";
 
 interface WhiteboardEditorProps {
   id: string;
@@ -30,6 +31,7 @@ export function WhiteboardEditor({ id }: WhiteboardEditorProps) {
   const [shapes, setShapes] = useState<WhiteboardShape[]>([]);
   const [tool, setTool] = useState<string>("SELECT");
   const [color, setColor] = useState<string>("#3b82f6");
+  const session = authClient.useSession();
 
   // Create Y.Doc and Provider once per board ID — no session dependency
   const { doc, provider } = useMemo(() => {
@@ -38,9 +40,10 @@ export function WhiteboardEditor({ id }: WhiteboardEditorProps) {
       url: `ws://localhost:3005/api/whiteboard/${id}`,
       name: id,
       document: ydoc,
+      token: session.data?.session.token,
     });
     return { doc: ydoc, provider: p };
-  }, [id]);
+  }, [id, session.data?.session.token]);
 
   useEffect(() => {
     const yShapes = doc.getMap<WhiteboardShape>(WHITEBOARD_KEYS.SHAPES);
