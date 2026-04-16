@@ -1,0 +1,24 @@
+{
+  "name": "@workspace/hocuspocus",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./server": "./src/hocuspocus-server.ts",
+    "./client": "./src/hocuspocus-client.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@hocuspocus/provider": "^3.4.4",
+    "@hocuspocus/server": "^3.4.4",
+    "yjs": "^13.6.30",
+    "@workspace/db": "workspace:*",
+    "@workspace/better-auth": "workspace:*",
+    "@workspace/whiteboard": "workspace:*"
+  }
+}

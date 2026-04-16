@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, Settings, User } from "lucide-react";
+
 import { authClient } from "@workspace/better-auth/client";
 import {
   Avatar,

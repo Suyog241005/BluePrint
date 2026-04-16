@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Trash2, ArrowRight, Clock, Box } from "lucide-react";
 import Link from "next/link";
+
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import {
@@ -12,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+
 import {
   useSuspenseWhiteboards,
   useCreateWhiteboard,

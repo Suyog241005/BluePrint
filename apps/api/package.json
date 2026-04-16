@@ -18,16 +18,16 @@
   },
   "dependencies": {
     "@trpc/server": "^11.0.0-rc.821",
-    "@workspace/better-auth": "workspace:*",
-    "@workspace/db": "workspace:*",
-    "@workspace/trpc": "workspace:*",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-ws": "^5.0.2",
     "yjs": "^13.6.30",
-    "@hocuspocus/server": "^2.13.0",
+    "zod": "^4.3.6",
+    "@workspace/db": "workspace:*",
+    "@workspace/trpc": "workspace:*",
     "@workspace/whiteboard": "workspace:*",
-    "zod": "^4.3.6"
+    "@workspace/better-auth": "workspace:*",
+    "@workspace/hocuspocus": "workspace:*"
   }
 }

@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect, useMemo } from "react"
 import { Stage, Layer, Shape, Line } from "react-konva"
 import type Konva from "konva"
 import rough from "roughjs"
+
 import type { WhiteboardShape } from "@workspace/whiteboard"
 
 interface CanvasProps {

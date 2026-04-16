@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { HocuspocusProvider } from "@hocuspocus/provider";
 import {
   CircleIcon,
   MousePointer2Icon,
@@ -9,6 +8,8 @@ import {
   TrashIcon,
   PencilIcon,
 } from "lucide-react";
+
+import { HocuspocusProvider } from "@workspace/hocuspocus/client";
 import {
   WHITEBOARD_KEYS,
   createWhiteboardDoc,
@@ -20,8 +21,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { DynamicCanvas } from "@/lib/dynamic-exporter";
 import { authClient } from "@workspace/better-auth/client";
+
+import { DynamicCanvas } from "@/lib/dynamic-exporter";
 
 interface WhiteboardEditorProps {
   id: string;
